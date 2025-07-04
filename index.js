@@ -11,8 +11,21 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const app = express();
-// app.use(cors());
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
+// Allow both localhost and client URL from env
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL
+].filter(Boolean);
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(cookieParser());
